@@ -23,6 +23,8 @@ const InfoPage = () => {
   const [isMegaEvolved, setIsMegaEvolved] = useState(false);
   const [megaSprite, setMegaSprite] = useState(null);
   const [megaShinySprite, setMegaShinySprite] = useState(null);
+  const [backSpriteAvailable, setBackSpriteAvailable] = useState(true);
+  const [megaSpriteSize, setMegaSpriteSize] = useState("w-40 h-40"); // Dimensione predefinita per lo sprite mega evoluto
 
   useEffect(() => {
     const fetchPokemon = async () => {
@@ -49,7 +51,18 @@ const InfoPage = () => {
             : "Descrizione non disponibile."
         );
 
-        // Fetch sprites for mega evolution
+        // Check if back sprite is available for new generation Pokémon
+        if (response.data.id > 649) {
+          try {
+            await axios.get(
+              `https://raw.githubusercontent.com/PokeAPI/sprites/6127a37944160e603c1a707ac0c5f8e367b4050a/sprites/pokemon/versions/generation-v/black-white/back/${response.data.id}.png`
+            );
+          } catch {
+            setBackSpriteAvailable(false);
+          }
+        }
+
+        // Fetch mega evolution data
         const evolutionResponse = await axios.get(
           `https://pokeapi.co/api/v2/evolution-chain/${
             speciesResponse.data.evolution_chain.url.split("/")[6]
@@ -61,12 +74,15 @@ const InfoPage = () => {
         const megaEvolution = megaEvolves.find(
           (evo) => evo.species.name === id
         );
+
         if (megaEvolution) {
-          const megaResponse = await axios.get(
-            `https://pokeapi.co/api/v2/pokemon/${megaEvolution.species.name}`
+          const megaId = megaEvolution.species.url.split("/")[6]; // Assumes the ID is part of the URL
+
+          // Set mega evolution sprites URLs
+          setMegaSprite(
+            `https://raw.githubusercontent.com/PokeAPI/sprites/6127a37944160e603c1a707ac0c5f8e367b4050a/sprites/pokemon/versions/generation-v/black-white/${megaId}-mega.png`
           );
-          setMegaSprite(megaResponse.data.sprites.front_default);
-          setMegaShinySprite(megaResponse.data.sprites.front_shiny);
+          // Optional: fetch and set mega shiny sprite here
         }
       } catch (error) {
         console.error("Errore nel recupero dei dati del Pokémon:", error);
@@ -91,28 +107,47 @@ const InfoPage = () => {
     return <div>Nessun dato disponibile per questo Pokémon.</div>;
   }
 
-  const sprites = pokemon.sprites;
-  const frontSpriteUrl = sprites
-    ? isMegaEvolved
+  const isNewGeneration = pokemon.id > 649;
+  const staticFrontSpriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/6127a37944160e603c1a707ac0c5f8e367b4050a/sprites/pokemon/versions/generation-v/black-white/${pokemon.id}.png`;
+  const staticBackSpriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/6127a37944160e603c1a707ac0c5f8e367b4050a/sprites/pokemon/versions/generation-v/black-white/back/${pokemon.id}.png`;
+  const staticFrontShinySpriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/6127a37944160e603c1a707ac0c5f8e367b4050a/sprites/pokemon/versions/generation-v/black-white/shiny/${pokemon.id}.png`;
+  const staticBackShinySpriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/6127a37944160e603c1a707ac0c5f8e367b4050a/sprites/pokemon/versions/generation-v/black-white/back/shiny/${pokemon.id}.png`;
+
+  const animatedFrontSpriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${pokemon.id}.gif`;
+  const animatedBackSpriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/${pokemon.id}.gif`;
+  const animatedFrontShinySpriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/shiny/${pokemon.id}.gif`;
+  const animatedBackShinySpriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/shiny/${pokemon.id}.gif`;
+
+  const frontSpriteUrl = pokemon.sprites
+    ? isNewGeneration
       ? isShiny
-        ? megaShinySprite
-        : megaSprite
+        ? staticFrontShinySpriteUrl
+        : staticFrontSpriteUrl
+      : isMegaEvolved
+      ? megaSprite
       : isShiny
-      ? sprites.front_shiny
-      : sprites.front_default
-    : null;
-  const backSpriteUrl = sprites
-    ? isMegaEvolved
-      ? isShiny
-        ? megaShinySprite
-        : megaSprite
-      : isShiny
-      ? sprites.back_shiny
-      : sprites.back_default
+      ? animatedFrontShinySpriteUrl
+      : animatedFrontSpriteUrl
     : null;
 
+  const backSpriteUrl = pokemon.sprites
+    ? isNewGeneration
+      ? isShiny
+        ? staticBackShinySpriteUrl
+        : staticBackSpriteUrl
+      : isMegaEvolved
+      ? megaSprite
+      : isShiny
+      ? animatedBackShinySpriteUrl
+      : animatedBackSpriteUrl
+    : null;
+
+  // Check for availability of back sprite for new generation Pokémon
+  const showBackSpriteUnavailableMessage =
+    isNewGeneration && !backSpriteAvailable;
+
   const handleSpriteClick = () => {
-    if (backSpriteUrl) {
+    if (backSpriteAvailable || !showBackSpriteUnavailableMessage) {
       setIsFrontSprite(!isFrontSprite);
     }
   };
@@ -162,7 +197,15 @@ const InfoPage = () => {
             handleSpriteClick={handleSpriteClick}
             pokemonName={pokemon.name}
             typeColors={typeColors}
+            pokemonId={pokemon.id} // Passa l'ID del Pokémon
+            megaSpriteSize={isMegaEvolved ? megaSpriteSize : null} // Passa la dimensione dello sprite mega
           />
+
+          {showBackSpriteUnavailableMessage && (
+            <div className="text-center text-red-500 mt-2">
+              Back Sprite non disponibile :(
+            </div>
+          )}
 
           <InfoButtons
             shinyToggle={handleShinyToggle}

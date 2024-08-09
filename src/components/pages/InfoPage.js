@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { TYPE_COLORS, TYPE_TRANSLATIONS } from "../utilities/TypeColors";
-import abilitiesTranslations from "../utilities/AbilitiesTranslations";
+import { TYPE_COLORS } from "../utilities/TypeColors";
 import { FaArrowLeft } from "react-icons/fa";
+import axios from "axios";
 import InfoButtons from "../InfoButtons";
-import CanMegaEvolve from "../CanMegaEvolve";
+import PokemonDescription from "./info-components/PokemonDescriptions";
+import PokemonAbilities from "./info-components/PokemonAbilities";
+import PokemonEvolutions from "./info-components/PokemonEvolutions";
+import StrenghtsAndWeaknesses from "./info-components/StrenghtsAndWeaknesses";
+import PokemonTypes from "./info-components/PokemonTypes";
+import PokemonImages from "./info-components/PokemonImages";
 
 const InfoPage = () => {
   const { id } = useParams();
@@ -18,6 +22,7 @@ const InfoPage = () => {
   const [isShiny, setIsShiny] = useState(false);
   const [isMegaEvolved, setIsMegaEvolved] = useState(false);
   const [megaSprite, setMegaSprite] = useState(null);
+  const [megaShinySprite, setMegaShinySprite] = useState(null);
 
   useEffect(() => {
     const fetchPokemon = async () => {
@@ -43,6 +48,26 @@ const InfoPage = () => {
             ? italianDescription.flavor_text
             : "Descrizione non disponibile."
         );
+
+        // Fetch sprites for mega evolution
+        const evolutionResponse = await axios.get(
+          `https://pokeapi.co/api/v2/evolution-chain/${
+            speciesResponse.data.evolution_chain.url.split("/")[6]
+          }`
+        );
+        const megaEvolves = evolutionResponse.data.chain.evolves_to.flatMap(
+          (evo) => evo.evolves_to
+        );
+        const megaEvolution = megaEvolves.find(
+          (evo) => evo.species.name === id
+        );
+        if (megaEvolution) {
+          const megaResponse = await axios.get(
+            `https://pokeapi.co/api/v2/pokemon/${megaEvolution.species.name}`
+          );
+          setMegaSprite(megaResponse.data.sprites.front_default);
+          setMegaShinySprite(megaResponse.data.sprites.front_shiny);
+        }
       } catch (error) {
         console.error("Errore nel recupero dei dati del Pokémon:", error);
         setError("Si è verificato un errore nel recupero dei dati.");
@@ -68,15 +93,19 @@ const InfoPage = () => {
 
   const sprites = pokemon.sprites;
   const frontSpriteUrl = sprites
-    ? isMegaEvolved && megaSprite
-      ? megaSprite
+    ? isMegaEvolved
+      ? isShiny
+        ? megaShinySprite
+        : megaSprite
       : isShiny
       ? sprites.front_shiny
       : sprites.front_default
     : null;
   const backSpriteUrl = sprites
-    ? isMegaEvolved && megaSprite
-      ? megaSprite
+    ? isMegaEvolved
+      ? isShiny
+        ? megaShinySprite
+        : megaSprite
       : isShiny
       ? sprites.back_shiny
       : sprites.back_default
@@ -126,23 +155,14 @@ const InfoPage = () => {
 
       <div className="flex flex-col lg:flex-row items-center justify-evenly mt-10">
         <div className="relative flex flex-col items-center">
-          <div
-            className="relative py-4 p-2 bg-[#202020] rounded-lg h-[15rem] w-[15rem] flex justify-center items-center cursor-pointer"
-            style={{
-              borderColor: typeColors[0],
-              borderWidth: "2px",
-              borderStyle: "solid",
-            }}
-            onClick={handleSpriteClick}
-          >
-            <img
-              src={
-                isFrontSprite ? frontSpriteUrl : backSpriteUrl || frontSpriteUrl
-              }
-              alt={pokemon.name}
-              className="w-48 h-48 object-contain"
-            />
-          </div>
+          <PokemonImages
+            frontSpriteUrl={frontSpriteUrl}
+            backSpriteUrl={backSpriteUrl}
+            isFrontSprite={isFrontSprite}
+            handleSpriteClick={handleSpriteClick}
+            pokemonName={pokemon.name}
+            typeColors={typeColors}
+          />
 
           <InfoButtons
             shinyToggle={handleShinyToggle}
@@ -153,6 +173,7 @@ const InfoPage = () => {
             isMegaEvolved={isMegaEvolved}
             isShiny={isShiny}
             setMegaSprite={setMegaSprite}
+            setMegaShinySprite={setMegaShinySprite}
           />
         </div>
 
@@ -168,99 +189,22 @@ const InfoPage = () => {
             #{pokemon.id}{" "}
             {pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)}
           </h1>
-          <div
-            className="flex flex-row justify-center items-center mt-4 p-4 bg-[#202020] border-2 rounded-3xl"
-            style={{
-              borderColor: typeColors[0],
-              borderWidth: "2px",
-              borderStyle: "solid",
-            }}
-          >
-            {pokemon.types.map((type) => (
-              <span
-                key={type.type.name}
-                className="mx-2 px-4 py-1 rounded-full text-white"
-                style={{ backgroundColor: TYPE_COLORS[type.type.name] }}
-              >
-                {TYPE_TRANSLATIONS[type.type.name]}
-              </span>
-            ))}
-          </div>
+          <PokemonTypes types={pokemon.types} typeColors={typeColors} />
         </div>
 
-        <div className="w-[90%] lg:w-[45%] flex flex-col justify-center">
-          <div
-            className="flex flex-row justify-center items-center mt-4 p-4 bg-[#202020] border-2 rounded-3xl"
-            style={{
-              borderColor: typeColors[0],
-              borderWidth: "2px",
-              borderStyle: "solid",
-            }}
-          >
-            <div className="flex flex-col justify-center items-center">
-              <h2 className="text-2xl font-semibold">Descrizione</h2>
-              <p className="pt-2 text-center">{pokedexDescription}</p>
-            </div>
-          </div>
-          <div
-            className="flex flex-row justify-evenly items-center mt-4 p-4 bg-[#202020] border-2 rounded-3xl"
-            style={{
-              borderColor: typeColors[0],
-              borderWidth: "2px",
-              borderStyle: "solid",
-            }}
-          >
-            <p>Altezza: {pokemon.height / 10} m</p>
-            <p>Peso: {pokemon.weight / 10} kg</p>
-          </div>
-        </div>
+        <PokemonDescription
+          pokedexDescription={pokedexDescription}
+          height={pokemon.height}
+          weight={pokemon.weight}
+          typeColors={typeColors}
+        />
       </div>
 
-      <div
-        className="mt-8 p-4 bg-[#202020] border-2 rounded-3xl"
-        style={{
-          borderColor: typeColors[0],
-          borderWidth: "2px",
-          borderStyle: "solid",
-        }}
-      >
-        <h2 className="text-2xl font-semibold">Abilità</h2>
-        <div className="grid grid-cols-2 gap-4">
-          {pokemon.abilities &&
-            pokemon.abilities.map((ability) => (
-              <div key={ability.ability.name} className="flex justify-between">
-                <span>
-                  {abilitiesTranslations[ability.ability.name] ||
-                    ability.ability.name}
-                </span>
-              </div>
-            ))}
-        </div>
-      </div>
+      <PokemonAbilities abilities={pokemon.abilities} typeColors={typeColors} />
 
-      <div
-        className="mt-8 p-4 bg-[#202020] border-2 rounded-3xl"
-        style={{
-          borderColor: typeColors[0],
-          borderWidth: "2px",
-          borderStyle: "solid",
-        }}
-      >
-        <h2 className="text-2xl font-semibold">Evoluzioni</h2>
-        <p>Evoluzioni non implementate ancora</p>
-      </div>
+      <PokemonEvolutions typeColors={typeColors} />
 
-      <div
-        className="mt-8 p-4 bg-[#202020] border-2 rounded-3xl"
-        style={{
-          borderColor: typeColors[0],
-          borderWidth: "2px",
-          borderStyle: "solid",
-        }}
-      >
-        <h2 className="text-2xl font-semibold">Resistenze e Debolezze</h2>
-        <p>Resistenze e debolezze non implementate ancora</p>
-      </div>
+      <StrenghtsAndWeaknesses typeColors={typeColors} />
     </div>
   );
 };

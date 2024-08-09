@@ -45,16 +45,22 @@ function AppContent() {
   return (
     <div className="App">
       <Navbar />
-      <div className="flex flex-col items-center h-screen space-y-4">
-        <Routes>
-          <Route path="/" element={<Searchbar />} />
-          <Route path="/nationaldex" element={<NationalDex />} />
-          <Route path="/random-pokemon" element={<RandomPokemon />} />
-          <Route path="/type/:type" element={<TypeOrder />} />
-          <Route path="/generation/:number" element={<GenOrder />} />
-          <Route path="/pokemon/:id" element={<InfoPage />} />{" "}
-        </Routes>
-      </div>
+      {location.pathname === "/" && (
+        <div className="w-full h-screen flex items-center justify-center">
+          <Searchbar />
+        </div>
+      )}
+      {location.pathname !== "/" && (
+        <div className="flex flex-col items-center h-screen space-y-4">
+          <Routes>
+            <Route path="/nationaldex" element={<NationalDex />} />
+            <Route path="/random-pokemon" element={<RandomPokemon />} />
+            <Route path="/type/:type" element={<TypeOrder />} />
+            <Route path="/generation/:number" element={<GenOrder />} />
+            <Route path="/pokemon/:id" element={<InfoPage />} />
+          </Routes>
+        </div>
+      )}
       {location.pathname !== "/" && (
         <>
           <HomeBtn

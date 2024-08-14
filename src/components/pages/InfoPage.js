@@ -1,8 +1,9 @@
+// src/components/pages/InfoPage.js
+
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { TYPE_COLORS } from "../utilities/TypeColors";
-import { FaArrowLeft } from "react-icons/fa";
+import { useParams } from "react-router-dom";
 import axios from "axios";
+import { TYPE_COLORS } from "../utilities/TypeColors";
 import InfoButtons from "../InfoButtons";
 import PokemonDescription from "./info-components/PokemonDescriptions";
 import PokemonAbilities from "./info-components/PokemonAbilities";
@@ -10,10 +11,10 @@ import PokemonEvolutions from "./info-components/PokemonEvolutions";
 import StrenghtsAndWeaknesses from "./info-components/StrenghtsAndWeaknesses";
 import PokemonTypes from "./info-components/PokemonTypes";
 import PokemonImages from "./info-components/PokemonImages";
+import NavigationButtons from "../pages/info-components/NavigationButtons";
 
 const InfoPage = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [pokemon, setPokemon] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -24,20 +25,23 @@ const InfoPage = () => {
   const [megaSprite, setMegaSprite] = useState(null);
   const [megaShinySprite, setMegaShinySprite] = useState(null);
   const [backSpriteAvailable, setBackSpriteAvailable] = useState(true);
-  const [megaSpriteSize, setMegaSpriteSize] = useState("w-40 h-40"); // Dimensione predefinita per lo sprite mega evoluto
+  const [megaSpriteSize, setMegaSpriteSize] = useState("w-40 h-40");
+  const [prevPokemonIcon, setPrevPokemonIcon] = useState(null);
+  const [nextPokemonIcon, setNextPokemonIcon] = useState(null);
+
+  const previousId = pokemon ? Math.max(pokemon.id - 1, 1) : null;
+  const nextId = pokemon ? pokemon.id + 1 : null;
 
   useEffect(() => {
     const fetchPokemon = async () => {
       setLoading(true);
       setError(null);
       try {
-        // Fetch Pokémon data
         const response = await axios.get(
           `https://pokeapi.co/api/v2/pokemon/${id}`
         );
         setPokemon(response.data);
 
-        // Fetch species data for description
         const speciesResponse = await axios.get(
           `https://pokeapi.co/api/v2/pokemon-species/${id}`
         );
@@ -51,7 +55,6 @@ const InfoPage = () => {
             : "Descrizione non disponibile."
         );
 
-        // Check if back sprite is available for new generation Pokémon
         if (response.data.id > 649) {
           try {
             await axios.get(
@@ -62,7 +65,6 @@ const InfoPage = () => {
           }
         }
 
-        // Fetch mega evolution data
         const evolutionResponse = await axios.get(
           `https://pokeapi.co/api/v2/evolution-chain/${
             speciesResponse.data.evolution_chain.url.split("/")[6]
@@ -76,13 +78,28 @@ const InfoPage = () => {
         );
 
         if (megaEvolution) {
-          const megaId = megaEvolution.species.url.split("/")[6]; // Assumes the ID is part of the URL
-
-          // Set mega evolution sprites URLs
+          const megaId = megaEvolution.species.url.split("/")[6];
           setMegaSprite(
             `https://raw.githubusercontent.com/PokeAPI/sprites/6127a37944160e603c1a707ac0c5f8e367b4050a/sprites/pokemon/versions/generation-v/black-white/${megaId}-mega.png`
           );
-          // Optional: fetch and set mega shiny sprite here
+        }
+
+        if (previousId) {
+          try {
+            const prevIconUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/6127a37944160e603c1a707ac0c5f8e367b4050a/sprites/pokemon/versions/generation-viii/icons/${previousId}.png`;
+            setPrevPokemonIcon(prevIconUrl);
+          } catch {
+            setPrevPokemonIcon(null);
+          }
+        }
+
+        if (nextId) {
+          try {
+            const nextIconUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/6127a37944160e603c1a707ac0c5f8e367b4050a/sprites/pokemon/versions/generation-viii/icons/${nextId}.png`;
+            setNextPokemonIcon(nextIconUrl);
+          } catch {
+            setNextPokemonIcon(null);
+          }
         }
       } catch (error) {
         console.error("Errore nel recupero dei dati del Pokémon:", error);
@@ -93,7 +110,7 @@ const InfoPage = () => {
     };
 
     fetchPokemon();
-  }, [id]);
+  }, [id, previousId, nextId]);
 
   if (loading) {
     return <div>Caricamento...</div>;
@@ -142,7 +159,6 @@ const InfoPage = () => {
       : animatedBackSpriteUrl
     : null;
 
-  // Check for availability of back sprite for new generation Pokémon
   const showBackSpriteUnavailableMessage =
     isNewGeneration && !backSpriteAvailable;
 
@@ -180,13 +196,12 @@ const InfoPage = () => {
         borderStyle: "solid",
       }}
     >
-      <button
-        onClick={() => navigate(-1)}
-        className="absolute top-3.5 left-4 text-white text-2xl"
-        aria-label="Indietro"
-      >
-        <FaArrowLeft className="w-6 h-6" />
-      </button>
+      <NavigationButtons
+        prevPokemonIcon={prevPokemonIcon}
+        nextPokemonIcon={nextPokemonIcon}
+        previousId={previousId}
+        nextId={nextId}
+      />
 
       <div className="flex flex-col lg:flex-row items-center justify-evenly mt-10">
         <div className="relative flex flex-col items-center">
@@ -197,8 +212,8 @@ const InfoPage = () => {
             handleSpriteClick={handleSpriteClick}
             pokemonName={pokemon.name}
             typeColors={typeColors}
-            pokemonId={pokemon.id} // Passa l'ID del Pokémon
-            megaSpriteSize={isMegaEvolved ? megaSpriteSize : null} // Passa la dimensione dello sprite mega
+            pokemonId={pokemon.id}
+            megaSpriteSize={isMegaEvolved ? megaSpriteSize : null}
           />
 
           {showBackSpriteUnavailableMessage && (

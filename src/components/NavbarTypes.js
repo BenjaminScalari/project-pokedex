@@ -1,4 +1,3 @@
-// src/components/NavbarTypes.js
 import React from "react";
 import { Menu } from "@headlessui/react";
 import { Link } from "react-router-dom";
@@ -15,8 +14,19 @@ function NavbarTypes() {
         <ChevronDownIcon className="ml-1 h-5 w-5" />
       </Menu.Button>
       {/* IMPOSTAZIONI DROPDOWN TIPI */}
-      <Menu.Items className="absolute left-0 mt-2 w-80 rounded-md shadow-lg bg-black/75 backdrop-blur-md border-2">
-        <div className="grid grid-cols-3 gap-2 p-2">
+      <Menu.Items
+        className="
+          absolute left-0 mt-2 
+          w-full max-w-xs  /* Larghezza generale per mobile */
+          md:w-80  /* Larghezza per desktop con breakpoint xl */
+          rounded-md shadow-lg 
+          bg-black/75 backdrop-blur-md border-2"
+      >
+        <div
+          className="
+            grid grid-cols-2 gap-1 p-1  /* Griglia 2x9 come default */
+            md:grid-cols-3 md:gap-2 md:p-2  /* Griglia 3xN per desktop con breakpoint xl */"
+        >
           {types.map((type) => (
             <Menu.Item key={type}>
               {({ active }) => (
@@ -33,9 +43,7 @@ function NavbarTypes() {
                 >
                   <span
                     className={`transition-colors duration-300 ${
-                      active
-                        ? "font-bold" + TYPE_COLORS[type]
-                        : "font-normal"
+                      active ? "font-bold" + TYPE_COLORS[type] : "font-normal"
                     }`}
                     style={{
                       backgroundColor: "transparent",

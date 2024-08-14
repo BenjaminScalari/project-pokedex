@@ -24,8 +24,13 @@ function Searchbar() {
       );
       const pokemonId = response.data.id; // Ottieni l'ID del Pokémon
 
-      // Naviga alla pagina del Pokémon
-      navigate(`/pokemon/${pokemonId}`);
+      // Controlla se il Pokémon è nella lista dei primi 898
+      if (pokemonId > 898) {
+        setError("Pokémon non trovato");
+      } else {
+        // Naviga alla pagina del Pokémon
+        navigate(`/pokemon/${pokemonId}`);
+      }
     } catch (error) {
       setError("Pokémon non trovato");
     } finally {

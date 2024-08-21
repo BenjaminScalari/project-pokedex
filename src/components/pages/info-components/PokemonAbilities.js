@@ -11,11 +11,14 @@ const PokemonAbilities = ({ abilities, typeColors }) => {
         borderStyle: "solid",
       }}
     >
-      <h2 className="text-2xl font-semibold">Abilità</h2>
+      <h2 className="text-2xl font-semibold flex justify-center">Abilità</h2>
       <div className="grid grid-cols-2 gap-4">
         {abilities &&
           abilities.map((ability) => (
-            <div key={ability.ability.name} className="flex justify-between">
+            <div
+              key={ability.ability.name}
+              className="flex justify-center text-center"
+            >
               <span>
                 {abilitiesTranslations[ability.ability.name] ||
                   ability.ability.name}

@@ -28,6 +28,7 @@ const InfoPage = () => {
   const [megaSpriteSize, setMegaSpriteSize] = useState("w-40 h-40");
   const [prevPokemonIcon, setPrevPokemonIcon] = useState(null);
   const [nextPokemonIcon, setNextPokemonIcon] = useState(null);
+  const [evolutionChainUrl, setEvolutionChainUrl] = useState(null);
 
   const previousId = pokemon ? Math.max(pokemon.id - 1, 1) : null;
   const nextId = pokemon ? pokemon.id + 1 : null;
@@ -66,22 +67,34 @@ const InfoPage = () => {
         }
 
         const evolutionResponse = await axios.get(
-          `https://pokeapi.co/api/v2/evolution-chain/${
-            speciesResponse.data.evolution_chain.url.split("/")[6]
-          }`
+          `https://pokeapi.co/api/v2/pokemon-species/${id}`
         );
-        const megaEvolves = evolutionResponse.data.chain.evolves_to.flatMap(
-          (evo) => evo.evolves_to
-        );
-        const megaEvolution = megaEvolves.find(
-          (evo) => evo.species.name === id
-        );
+        setEvolutionChainUrl(evolutionResponse.data.evolution_chain.url);
 
-        if (megaEvolution) {
-          const megaId = megaEvolution.species.url.split("/")[6];
-          setMegaSprite(
-            `https://raw.githubusercontent.com/PokeAPI/sprites/6127a37944160e603c1a707ac0c5f8e367b4050a/sprites/pokemon/versions/generation-v/black-white/${megaId}-mega.png`
+        // Verifica se evolves_to è definito e un array
+        const evolutionChain = await axios.get(
+          evolutionResponse.data.evolution_chain.url
+        );
+        const evolutionData = evolutionChain.data;
+        if (
+          evolutionData.chain &&
+          Array.isArray(evolutionData.chain.evolves_to)
+        ) {
+          const megaEvolves = evolutionData.chain.evolves_to.flatMap(
+            (evo) => evo.evolves_to || []
           );
+          const megaEvolution = megaEvolves.find(
+            (evo) => evo.species.name === id
+          );
+
+          if (megaEvolution) {
+            const megaId = megaEvolution.species.url.split("/")[6];
+            setMegaSprite(
+              `https://raw.githubusercontent.com/PokeAPI/sprites/6127a37944160e603c1a707ac0c5f8e367b4050a/sprites/pokemon/versions/generation-v/black-white/${megaId}-mega.png`
+            );
+          }
+        } else {
+          setMegaSprite(null);
         }
 
         if (previousId) {
@@ -260,7 +273,10 @@ const InfoPage = () => {
 
       <PokemonAbilities abilities={pokemon.abilities} typeColors={typeColors} />
 
-      <PokemonEvolutions typeColors={typeColors} />
+      <PokemonEvolutions
+        evolutionChainUrl={evolutionChainUrl}
+        typeColors={typeColors}
+      />
 
       <StrenghtsAndWeaknesses typeColors={typeColors} />
     </div>

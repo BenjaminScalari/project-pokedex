@@ -8,11 +8,20 @@ import SlowpokeEvolutions from "./multiple-evolutions/SlowpokeEvolutions";
 import TyrogueEvolutions from "./multiple-evolutions/TyrogueEvolutions";
 import MimeJrEvolutions from "./multiple-evolutions/MimeJrEvolutions";
 import WurmpleEvolutions from "./multiple-evolutions/WurmpleEvolutions";
+import RaltsEvolutions from "./multiple-evolutions/RaltsEvolutions";
+import NincadaEvolutions from "./multiple-evolutions/NincadaEvolutions";
+import BurmyEvolutions from "./multiple-evolutions/BurmyEvolutions";
+import RockruffEvolutions from "./multiple-evolutions/RockruffEvolutions";
+import CosmogEvolutions from "./multiple-evolutions/CosmogEvolutions";
+import MeltanEvolutions from "./multiple-evolutions/MeltanEvolutions";
+import YamaskEvolutions from "./multiple-evolutions/YamaskEvolutions";
+import ToxelEvolutions from "./multiple-evolutions/ToxelEvolutions"; // Importa ToxelEvolutions
 
 const MAX_POKEMON_NUMBER = 898;
 
 const PokemonEvolutions = ({ evolutionChainUrl, typeColors }) => {
   const [evolutionChain, setEvolutionChain] = useState(null);
+  const [containsNincada, setContainsNincada] = useState(false);
 
   useEffect(() => {
     const fetchEvolutionChain = async () => {
@@ -20,6 +29,19 @@ const PokemonEvolutions = ({ evolutionChainUrl, typeColors }) => {
         try {
           const response = await axios.get(evolutionChainUrl);
           setEvolutionChain(response.data);
+
+          const checkNincada = (chain) => {
+            let current = chain;
+            while (current) {
+              if (current.species.name === "nincada") {
+                setContainsNincada(true);
+                return;
+              }
+              current = current.evolves_to[0];
+            }
+            setContainsNincada(false);
+          };
+          checkNincada(response.data.chain);
         } catch (error) {
           console.error("Errore nel recupero della catena evolutiva:", error);
         }
@@ -100,6 +122,77 @@ const PokemonEvolutions = ({ evolutionChainUrl, typeColors }) => {
           return (
             <React.Fragment key={species.name}>
               {/* DOVREBBE ESSERCI WURMPLE EVOLUTIONS, MA SE LO METTO SDOPPIA TUTTO, MENTRE SE ELIMINO QUESTO IF, SI SMONTA. FACENDO COSì INVECE VIENE VISUALIZZATO CORRETTAMENTE PERCHE BOH */}
+            </React.Fragment>
+          );
+        }
+
+        if (species.name === "gardevoir") {
+          return (
+            <React.Fragment key={species.name}>
+              <RaltsEvolutions />
+            </React.Fragment>
+          );
+        }
+
+        if (species.name === "nincada") {
+          // Aggiungi il caso per Nincada e ignora Ninjask
+          return (
+            <React.Fragment key={species.name}>
+              <NincadaEvolutions />
+            </React.Fragment>
+          );
+        }
+
+        if (species.name === "wormadam") {
+          // Aggiungi il caso per Burmy
+          return (
+            <React.Fragment key={species.name}>
+              <BurmyEvolutions />
+            </React.Fragment>
+          );
+        }
+
+        // Non mostrare Ninjask se Nincada è presente
+        if (species.name === "ninjask" && containsNincada) {
+          return null;
+        }
+
+        if (species.name === "lycanroc") {
+          return (
+            <React.Fragment key={species.name}>
+              <RockruffEvolutions />
+            </React.Fragment>
+          );
+        }
+
+        if (species.name === "solgaleo") {
+          return (
+            <React.Fragment key={species.name}>
+              <CosmogEvolutions />
+            </React.Fragment>
+          );
+        }
+
+        if (species.name === "meltan" || species.name === "melmetal") {
+          return (
+            <React.Fragment key={species.name}>
+              <MeltanEvolutions />
+            </React.Fragment>
+          );
+        }
+
+        if (species.name === "yamask") {
+          return (
+            <React.Fragment key={species.name}>
+              <YamaskEvolutions />
+            </React.Fragment>
+          );
+        }
+
+        if (species.name === "toxtricity") {
+          return (
+            <React.Fragment key={species.name}>
+              <ToxelEvolutions />
             </React.Fragment>
           );
         }

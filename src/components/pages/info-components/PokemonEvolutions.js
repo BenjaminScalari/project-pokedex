@@ -7,8 +7,9 @@ import PoliwagEvolutions from "./multiple-evolutions/PoliwagEvolutions";
 import SlowpokeEvolutions from "./multiple-evolutions/SlowpokeEvolutions";
 import TyrogueEvolutions from "./multiple-evolutions/TyrogueEvolutions";
 import MimeJrEvolutions from "./multiple-evolutions/MimeJrEvolutions";
+import WurmpleEvolutions from "./multiple-evolutions/WurmpleEvolutions";
 
-const MAX_POKEMON_NUMBER = 898; // Numero massimo da mostrare
+const MAX_POKEMON_NUMBER = 898;
 
 const PokemonEvolutions = ({ evolutionChainUrl, typeColors }) => {
   const [evolutionChain, setEvolutionChain] = useState(null);
@@ -42,8 +43,10 @@ const PokemonEvolutions = ({ evolutionChainUrl, typeColors }) => {
         (species) => parseInt(species.url.split("/")[6]) <= MAX_POKEMON_NUMBER
       )
       .map((species, index) => {
-        const isPoliwag = species.name === "poliwag";
-        const isSlowpoke = species.name === "slowpoke";
+        const isLastVisibleEvolution =
+          index === evolutions.length - 1 ||
+          parseInt(evolutions[index + 1]?.url.split("/")[6]) >
+            MAX_POKEMON_NUMBER;
 
         if (species.name === "vaporeon") {
           return (
@@ -77,7 +80,6 @@ const PokemonEvolutions = ({ evolutionChainUrl, typeColors }) => {
           );
         }
 
-        // Mostra solo Mime Jr e Mr. Mime, escludendo il secondo stadio di Mr. Rime
         if (species.name === "mr-mime") {
           return (
             <React.Fragment key={species.name}>
@@ -86,32 +88,20 @@ const PokemonEvolutions = ({ evolutionChainUrl, typeColors }) => {
           );
         }
 
-        if (species.name === "mr-mime" || species.name === "mr-rime") {
-          // Mostra Mr. Mime se è il primo stadio evolutivo, ma non Mr. Rime
-          if (index === 1) {
-            return (
-              <React.Fragment key={species.name}>
-                <Link
-                  to={`/pokemon/${species.name}`}
-                  className="flex flex-col items-center md:mx-4 lg:mx-12"
-                >
-                  <img
-                    src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${
-                      species.url.split("/")[6]
-                    }.png`}
-                    alt={species.name}
-                    className="w-24 h-24 sm:w-28 sm:h-28 md:w-28 md:h-32 lg:w-32 lg:h-32"
-                  />
-                  <span className="text-white mt-2 capitalize md:text-sm sm:text-xs">
-                    {species.name.charAt(0).toUpperCase() +
-                      species.name.slice(1)}
-                  </span>
-                </Link>
-              </React.Fragment>
-            );
-          } else {
-            return null;
-          }
+        if (species.name === "silcoon") {
+          return (
+            <React.Fragment key={species.name}>
+              <WurmpleEvolutions />
+            </React.Fragment>
+          );
+        }
+
+        if (species.name === "beautifly") {
+          return (
+            <React.Fragment key={species.name}>
+              {/* DOVREBBE ESSERCI WURMPLE EVOLUTIONS, MA SE LO METTO SDOPPIA TUTTO, MENTRE SE ELIMINO QUESTO IF, SI SMONTA. FACENDO COSì INVECE VIENE VISUALIZZATO CORRETTAMENTE PERCHE BOH */}
+            </React.Fragment>
+          );
         }
 
         return (
@@ -131,7 +121,7 @@ const PokemonEvolutions = ({ evolutionChainUrl, typeColors }) => {
                 {species.name.charAt(0).toUpperCase() + species.name.slice(1)}
               </span>
             </Link>
-            {index < evolutions.length - 1 && !isPoliwag && (
+            {index < evolutions.length - 1 && !isLastVisibleEvolution && (
               <div className="flex items-center mx-2">
                 <FaArrowRight className="w-4 h-4 md:w-5 md:h-5 sm:w-4 sm:h-4 text-white" />
               </div>

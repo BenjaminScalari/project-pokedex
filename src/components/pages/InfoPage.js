@@ -278,7 +278,10 @@ const InfoPage = () => {
         typeColors={typeColors}
       />
 
-      <StrenghtsAndWeaknesses typeColors={typeColors} />
+      <StrenghtsAndWeaknesses
+        typeColors={typeColors}
+        pokemonTypes={pokemon.types}
+      />
     </div>
   );
 };

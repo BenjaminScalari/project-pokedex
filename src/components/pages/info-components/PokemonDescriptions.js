@@ -7,7 +7,7 @@ const PokemonDescription = ({
   typeColors,
 }) => {
   return (
-    <div className="w-[90%] lg:w-[45%] flex flex-col justify-center">
+    <div className="w-[100%] lg:w-[45%] flex flex-col justify-center">
       <div
         className="flex flex-row justify-center items-center mt-4 p-4 bg-[#202020] border-2 rounded-3xl"
         style={{

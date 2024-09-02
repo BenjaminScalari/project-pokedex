@@ -181,7 +181,7 @@ const PokemonEvolutions = ({ evolutionChainUrl, typeColors }) => {
           );
         }
 
-        if (species.name === "yamask") {
+        if (species.name === "cofagrigus") {
           return (
             <React.Fragment key={species.name}>
               <YamaskEvolutions />

@@ -2,12 +2,34 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { TYPE_TRANSLATIONS, TYPE_COLORS } from "../../utilities/TypeColors";
 
+// Elenco di tutti i tipi Pokémon
+const ALL_TYPES = [
+  "normal",
+  "fire",
+  "water",
+  "electric",
+  "grass",
+  "ice",
+  "fighting",
+  "poison",
+  "ground",
+  "flying",
+  "psychic",
+  "bug",
+  "rock",
+  "ghost",
+  "dragon",
+  "dark",
+  "steel",
+  "fairy",
+];
+
 // Funzione per calcolare il danno totale in base alle debolezze
 const calculateWeaknesses = (types, damageRelations) => {
   const damageMultiplier = {};
 
   // Inizializza i moltiplicatori di danno
-  types.forEach((type) => {
+  ALL_TYPES.forEach((type) => {
     damageMultiplier[type] = 1;
   });
 
@@ -44,19 +66,19 @@ const calculateStrengths = (types, damageRelations) => {
   const damageMultiplier = {};
 
   // Inizializza i moltiplicatori di danno
-  types.forEach((type) => {
+  ALL_TYPES.forEach((type) => {
     damageMultiplier[type] = 1;
   });
 
   // Aggiorna i moltiplicatori di danno in base alle resistenze
   damageRelations.forEach((relation) => {
-    relation.damage_relations.double_damage_to.forEach((type) => {
+    relation.damage_relations.double_damage_from.forEach((type) => {
       damageMultiplier[type.name] = (damageMultiplier[type.name] || 1) * 2;
     });
-    relation.damage_relations.half_damage_to.forEach((type) => {
+    relation.damage_relations.half_damage_from.forEach((type) => {
       damageMultiplier[type.name] = (damageMultiplier[type.name] || 1) * 0.5;
     });
-    relation.damage_relations.no_damage_to.forEach((type) => {
+    relation.damage_relations.no_damage_from.forEach((type) => {
       damageMultiplier[type.name] = (damageMultiplier[type.name] || 1) * 0;
     });
   });
@@ -64,16 +86,19 @@ const calculateStrengths = (types, damageRelations) => {
   // Categorizza in base al moltiplicatore
   const strengthsX4 = [];
   const strengthsX2 = [];
+  const normalDamage = [];
 
   Object.entries(damageMultiplier).forEach(([type, multiplier]) => {
-    if (multiplier >= 4) {
+    if (multiplier <= 0.25) {
       strengthsX4.push(type);
-    } else if (multiplier >= 2) {
+    } else if (multiplier <= 0.5) {
       strengthsX2.push(type);
+    } else if (multiplier === 1) {
+      normalDamage.push(type);
     }
   });
 
-  return { strengthsX4, strengthsX2 };
+  return { strengthsX4, strengthsX2, normalDamage };
 };
 
 const StrenghtsAndWeaknesses = ({ typeColors, pokemonTypes }) => {
@@ -81,6 +106,7 @@ const StrenghtsAndWeaknesses = ({ typeColors, pokemonTypes }) => {
   const [strengthsX4, setStrengthsX4] = useState([]);
   const [weaknessesX2, setWeaknessesX2] = useState([]);
   const [weaknessesX4, setWeaknessesX4] = useState([]);
+  const [normalDamage, setNormalDamage] = useState([]);
   const [immunities, setImmunities] = useState([]);
 
   useEffect(() => {
@@ -99,36 +125,43 @@ const StrenghtsAndWeaknesses = ({ typeColors, pokemonTypes }) => {
           damageRelations
         );
 
-        const { strengthsX4, strengthsX2 } = calculateStrengths(
+        const { strengthsX4, strengthsX2, normalDamage } = calculateStrengths(
           pokemonTypes.map((type) => type.type.name),
           damageRelations
         );
 
         // Filtra immunità
-        const doubleDamageFrom = [];
-        const halfDamageFrom = [];
         const noDamageFrom = [];
-
         damageRelations.forEach((response) => {
-          const { double_damage_from, half_damage_from, no_damage_from } =
-            response.damage_relations;
-          doubleDamageFrom.push(...double_damage_from.map((type) => type.name));
-          halfDamageFrom.push(...half_damage_from.map((type) => type.name));
+          const { no_damage_from } = response.damage_relations;
           noDamageFrom.push(...no_damage_from.map((type) => type.name));
         });
 
-        // Rimuovi le immunità dalle resistenze
+        // Filtra le resistenze per rimuovere le immunità
         const strengthsX2Filtered = strengthsX2.filter(
-          (type) => !immunities.includes(type)
+          (type) => !noDamageFrom.includes(type)
         );
         const strengthsX4Filtered = strengthsX4.filter(
-          (type) => !immunities.includes(type)
+          (type) => !noDamageFrom.includes(type)
+        );
+
+        // Determina i tipi con danno normale x1
+        const allWeaknessesAndStrengths = [
+          ...weaknessesX4,
+          ...weaknessesX2,
+          ...strengthsX2Filtered,
+          ...strengthsX4Filtered,
+          ...noDamageFrom,
+        ];
+        const normalDamageFiltered = ALL_TYPES.filter(
+          (type) => !allWeaknessesAndStrengths.includes(type)
         );
 
         setWeaknessesX4(weaknessesX4);
         setWeaknessesX2(weaknessesX2);
         setStrengthsX4(strengthsX4Filtered);
         setStrengthsX2(strengthsX2Filtered);
+        setNormalDamage(normalDamageFiltered);
         setImmunities([...new Set(noDamageFrom)]);
       } catch (error) {
         console.error(
@@ -200,6 +233,19 @@ const StrenghtsAndWeaknesses = ({ typeColors, pokemonTypes }) => {
             <h3 className="text-xl font-semibold text-center">Debolezze x2:</h3>
             <div className="flex flex-wrap justify-center">
               {renderTypeIcons(weaknessesX2)}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {normalDamage.length > 0 && (
+        <div className="flex justify-center">
+          <div className="mt-4">
+            <h3 className="text-xl font-semibold text-center">
+              Danno Normale x1:
+            </h3>
+            <div className="flex flex-wrap justify-center">
+              {renderTypeIcons(normalDamage)}
             </div>
           </div>
         </div>

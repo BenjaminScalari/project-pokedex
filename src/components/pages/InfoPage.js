@@ -11,6 +11,7 @@ import PokemonEvolutions from "./info-components/PokemonEvolutions";
 import StrenghtsAndWeaknesses from "./info-components/StrenghtsAndWeaknesses";
 import PokemonTypes from "./info-components/PokemonTypes";
 import PokemonImages from "./info-components/PokemonImages";
+import PokemonStats from "./info-components/PokemonStats";
 import NavigationButtons from "../pages/info-components/NavigationButtons";
 
 const InfoPage = () => {
@@ -282,6 +283,8 @@ const InfoPage = () => {
         typeColors={typeColors}
         pokemonTypes={pokemon.types}
       />
+
+      <PokemonStats typeColors={typeColors} pokemonId={pokemon.id} />
     </div>
   );
 };

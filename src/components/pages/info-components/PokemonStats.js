@@ -81,7 +81,7 @@ const PokemonStats = ({ typeColors, pokemonId }) => {
               }}
             >
               <div
-                className="h-full rounded-full flex items-center ps-4"
+                className="h-full rounded-full flex items-center ps-2"
                 style={{
                   width: `${(stat.base_stat / 200) * 100}%`,
                   backgroundColor: statColor,

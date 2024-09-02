@@ -9,6 +9,7 @@ import "./App.css";
 import Navbar from "./components/Navbar";
 import Searchbar from "./components/Searchbar";
 import HomeBtn from "./components/HomeBtn";
+import MenuBtn from "./components/Menu"; // Importa il nuovo componente
 import ScrollUpPage from "./components/ScrollUpPage";
 import ScrollDownPage from "./components/ScrollDownPage";
 import { TYPE_COLORS } from "./components/utilities/TypeColors";
@@ -61,6 +62,8 @@ function AppContent() {
           </Routes>
         </div>
       )}
+      {/* Rendi il bottone Menu sempre visibile
+      <MenuBtn borderColor={borderColor} backgroundColor={backgroundColor} /> */}
       {location.pathname !== "/" && (
         <>
           <HomeBtn

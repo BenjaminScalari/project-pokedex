@@ -1,14 +1,21 @@
 // src/components/Navbar.js
 import React, { useState } from "react";
 import { Menu } from "@headlessui/react";
-import { ChevronDownIcon, MenuIcon, XIcon } from "@heroicons/react/solid";
-import { Link } from "react-router-dom";
+import {
+  ChevronDownIcon,
+  MenuIcon,
+  XIcon,
+  SearchIcon,
+} from "@heroicons/react/solid";
+import { Link, useLocation } from "react-router-dom";
 import NavbarTypes from "./NavbarTypes";
+import NavbarSearch from "./NavbarSearch";
 import { getGenerationName } from "./utilities/RegionGeneration";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-
+  const [searchVisible, setSearchVisible] = useState(false);
+  const location = useLocation();
   const generations = [
     { number: 1 },
     { number: 2 },
@@ -20,44 +27,21 @@ function Navbar() {
     { number: 8 },
   ];
 
-  return (
-    <nav className="fixed top-0 left-0 w-full p-4 flex justify-between items-center backdrop-blur-lg bg-black/75 z-50">
-      <div className="hidden md:flex space-x-4">
-        <Menu as="div" className="relative">
-          <Menu.Button className="text-white inline-flex items-center">
-            Generazioni
-            <ChevronDownIcon className="ml-1 h-5 w-5" />
-          </Menu.Button>
-          <Menu.Items className="absolute left-0 mt-2 w-96 max-h-80 overflow-auto rounded-md shadow-lg bg-black/75 backdrop-blur-md border-2">
-            <div className="grid grid-cols-3 gap-2 p-2">
-              {generations.map(({ number }) => (
-                <Menu.Item key={number}>
-                  {({ active }) => (
-                    <Link
-                      to={`/generation/${number}`}
-                      className={`block px-4 py-2 rounded-md text-center transition-colors duration-300 text-md ${
-                        active ? "bg-gray-100 text-black" : "text-white"
-                      } hover:text-black`}
-                    >
-                      {number}. {getGenerationName(number)}
-                    </Link>
-                  )}
-                </Menu.Item>
-              ))}
-            </div>
-          </Menu.Items>
-        </Menu>
-        <NavbarTypes />
-        <Link to="/random-pokemon" className="text-white">
-          Un Pokémon a Caso
-        </Link>
-        <Link to="/nationaldex" className="text-white">
-          Dex Nazionale
-        </Link>
-      </div>
+  const showSearchBar = location.pathname !== "/";
 
+  const handleSearchIconClick = () => {
+    setSearchVisible(true);
+  };
+
+  const handleSearchBarClose = () => {
+    setSearchVisible(false);
+  };
+
+  return (
+    <nav className="fixed top-0 left-0 w-full flex items-center backdrop-blur-lg bg-black/75 z-50">
+      {/* Pulsante dell'hamburger menu visibile su mobile */}
       <button
-        className="md:hidden text-white ml-auto"
+        className="md:hidden text-white p-4"
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Toggle menu"
       >
@@ -68,9 +52,79 @@ function Navbar() {
         )}
       </button>
 
+      {/* Contenuti centrali della navbar */}
+      <div className="flex-grow flex items-center space-x-4 p-4">
+        <div className="hidden md:flex items-center space-x-4">
+          <Menu as="div" className="relative">
+            <Menu.Button className="text-white inline-flex items-center">
+              Generazioni
+              <ChevronDownIcon className="ml-1 h-5 w-5" />
+            </Menu.Button>
+            <Menu.Items className="absolute left-0 mt-2 w-96 max-h-80 overflow-auto rounded-md shadow-lg bg-black/75 backdrop-blur-md border-2">
+              <div className="grid grid-cols-3 gap-2 p-2">
+                {generations.map(({ number }) => (
+                  <Menu.Item key={number}>
+                    {({ active }) => (
+                      <Link
+                        to={`/generation/${number}`}
+                        className={`block px-4 py-2 rounded-md text-center transition-colors duration-300 text-md ${
+                          active ? "bg-gray-100 text-black" : "text-white"
+                        } hover:text-black`}
+                      >
+                        {number}. {getGenerationName(number)}
+                      </Link>
+                    )}
+                  </Menu.Item>
+                ))}
+              </div>
+            </Menu.Items>
+          </Menu>
+          <NavbarTypes />
+          <Link to="/random-pokemon" className="text-white">
+            Un Pokémon a Caso
+          </Link>
+          <Link to="/nationaldex" className="text-white">
+            Dex Nazionale
+          </Link>
+        </div>
+      </div>
+
+      {/* Barra di ricerca visibile su desktop e mobile */}
+      {showSearchBar && !searchVisible && (
+        <div className="hidden md:flex items-center ml-auto pr-4">
+          <NavbarSearch />
+        </div>
+      )}
+
+      {/* Pulsante di ricerca per mobile */}
+      {showSearchBar && !searchVisible && (
+        <button
+          className="md:hidden text-white ml-auto pr-4"
+          onClick={handleSearchIconClick}
+          aria-label="Search"
+        >
+          <SearchIcon className="h-6 w-6" />
+        </button>
+      )}
+
+      {/* Barra di ricerca visibile solo su mobile */}
+      {showSearchBar && searchVisible && (
+        <div className="md:hidden flex items-center ml-auto">
+          <NavbarSearch />
+          <button
+            className="ml-4 text-white pr-4"
+            onClick={handleSearchBarClose}
+            aria-label="Close search"
+          >
+            <XIcon className="h-6 w-6" />
+          </button>
+        </div>
+      )}
+
+      {/* Menu laterale per mobile */}
       <div
-        className={`fixed top-0 right-0 w-64 h-full bg-[#191919] p-4 transform transition-transform ${
-          isOpen ? "translate-x-0" : "translate-x-full"
+        className={`fixed top-0 left-0 w-64 h-full bg-[#191919] p-4 transform transition-transform ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
         } md:hidden`}
       >
         <button

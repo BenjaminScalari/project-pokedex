@@ -1,0 +1,14 @@
+.custom-gradient {
+  background: linear-gradient(to bottom, 
+    #202020 0%,
+    #202020 15%,
+    #9d0000 15%,
+    #9d0000 45%,
+    #202020 45%,
+    #202020 55%,
+    #ffffff 55%,
+    #ffffff 85%,
+    #202020 85%,
+    #202020 100%
+  );
+}

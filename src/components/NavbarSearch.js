@@ -58,7 +58,7 @@ function NavbarSearch() {
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
         placeholder="Cerca un Pokémon..."
-        className="h-10 md:h-10 w-full w-40 md:w-64 py-2 pl-12 pr-16 border border-gray-300 rounded-full shadow-md focus:outline-none focus:ring-2 focus:ring-violet-500 text-black placeholder-gray-500"
+        className="h-10 md:h-10 w-full w-40 md:w-64 py-2 pl-12 pr-16 border border-gray-300 rounded-full shadow-md focus:outline-none focus:ring-2 focus:ring-[#9d0000] text-black placeholder-gray-500"
       />
       <span className="absolute inset-y-0 left-0 flex items-center pl-4">
         <svg
@@ -78,7 +78,7 @@ function NavbarSearch() {
       <button
         type="button"
         onClick={handleSearch}
-        className="absolute inset-y-0 right-0 flex items-center px-4 py-2 text-white bg-violet-500 rounded-full shadow-md hover:bg-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-500"
+        className="absolute inset-y-0 right-0 flex items-center px-4 py-2 text-white bg-[#9d0000] rounded-full shadow-md hover:bg-[#8d0000] focus:outline-none focus:ring-2 focus:ring-[#ffffff]"
       >
         {loading ? (
           <svg

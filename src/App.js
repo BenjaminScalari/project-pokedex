@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import {
   BrowserRouter as Router,
   Routes,
@@ -7,12 +8,12 @@ import {
 } from "react-router-dom";
 import "./App.css";
 import Navbar from "./components/Navbar";
-import Searchbar from "./components/Searchbar";
+import Searchbar from "./components/Homepage";
 import HomeBtn from "./components/HomeBtn";
-import MenuBtn from "./components/Menu"; // Importa il nuovo componente
 import ScrollUpPage from "./components/ScrollUpPage";
 import ScrollDownPage from "./components/ScrollDownPage";
 import { TYPE_COLORS } from "./components/utilities/TypeColors";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 // PAGINE
 import NationalDex from "./components/pages/NationalDex";
@@ -20,6 +21,8 @@ import RandomPokemon from "./components/pages/RandomPokemon";
 import TypeOrder from "./components/pages/TypeOrder";
 import GenOrder from "./components/pages/GenOrder";
 import InfoPage from "./components/pages/InfoPage";
+import LoginPage from "./components/pages/LoginPage";
+import RegistrationPage from "./components/pages/RegistrationPage";
 
 function AppContent() {
   const location = useLocation();
@@ -59,11 +62,11 @@ function AppContent() {
             <Route path="/type/:type" element={<TypeOrder />} />
             <Route path="/generation/:number" element={<GenOrder />} />
             <Route path="/pokemon/:id" element={<InfoPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegistrationPage />} />
           </Routes>
         </div>
       )}
-      {/* Rendi il bottone Menu sempre visibile
-      <MenuBtn borderColor={borderColor} backgroundColor={backgroundColor} /> */}
       {location.pathname !== "/" && (
         <>
           <HomeBtn
@@ -87,9 +90,13 @@ function AppContent() {
 function App() {
   return (
     <Router>
-      <AppContent />
+      <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+        <AppContent />
+      </GoogleOAuthProvider>
     </Router>
   );
 }
+
+ReactDOM.render(<App />, document.getElementById("root"));
 
 export default App;

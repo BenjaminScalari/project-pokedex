@@ -1,4 +1,3 @@
-// src/components/Navbar.js
 import React, { useState } from "react";
 import { Menu } from "@headlessui/react";
 import {
@@ -28,6 +27,8 @@ function Navbar() {
   ];
 
   const showSearchBar = location.pathname !== "/";
+  const hideLoginButton =
+    location.pathname === "/login" || location.pathname === "/register";
 
   const handleSearchIconClick = () => {
     setSearchVisible(true);
@@ -118,6 +119,18 @@ function Navbar() {
           >
             <XIcon className="h-6 w-6" />
           </button>
+        </div>
+      )}
+
+      {/* Pulsante Login/Registrazione */}
+      {!hideLoginButton && (
+        <div className="ml-auto">
+          <Link
+            to="/login"
+            className="text-white px-4 py-2 rounded-full hover:bg-[#9d0000] transition duration-300"
+          >
+            Accedi/Registrati
+          </Link>
         </div>
       )}
 

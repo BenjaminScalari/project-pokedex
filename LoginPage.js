@@ -35,14 +35,18 @@ function LoginPage() {
   };
 
   const onSuccess = (response) => {
-    console.log("LOGIN SUCCESS! Current user: ", response);
-    const token = response.credential; // Estrai il token dal response
-    localStorage.setItem("token", token);
-    navigate("/user");
+    console.log("LOGIN SUCCESS! Response: ", response);
+    if (response.credential) {
+      const token = response.credential;
+      localStorage.setItem("token", token);
+      navigate("/user");
+    } else {
+      console.error("No credential found in response");
+    }
   };
 
   const onFailure = (error) => {
-    console.log("LOGIN FAILED! Error: ", error);
+    console.error("LOGIN FAILED! Error: ", error);
   };
 
   return (

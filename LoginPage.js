@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { GoogleLogin } from "react-google-login";
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 
 const clientId =
   "129927102347-5lhjeqb9bavq1rcfdu0tnleua1o0o6gm.apps.googleusercontent.com";
@@ -14,7 +14,6 @@ function LoginPage() {
     e.preventDefault();
     try {
       const response = await fetch("/api/login", {
-        // URL dell'endpoint di login
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -25,11 +24,10 @@ function LoginPage() {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem("token", data.token); // Memorizza il token
-        navigate("/user"); // Redirect alla pagina utente
+        localStorage.setItem("token", data.token);
+        navigate("/user");
       } else {
         console.log("Login failed:", data.message);
-        // Gestisci l'errore, ad esempio mostrando un messaggio all'utente
       }
     } catch (error) {
       console.error("Error:", error);
@@ -37,10 +35,10 @@ function LoginPage() {
   };
 
   const onSuccess = (res) => {
-    console.log("LOGIN SUCCESS! Current user: ", res.profileObj);
-    const token = res.tokenId; // Estrai il token dal res
-    localStorage.setItem("token", token); // Memorizza il token
-    navigate("/user"); // Redirect alla pagina utente
+    console.log("LOGIN SUCCESS! Current user: ", res);
+    const token = res.credential; // Estrai il token dal res
+    localStorage.setItem("token", token);
+    navigate("/user");
   };
 
   const onFailure = (res) => {
@@ -48,74 +46,68 @@ function LoginPage() {
   };
 
   return (
-    <div className="w-full flex flex-col items-center justify-center min-h-screen text-white">
-      <div className="bg-[#303030] p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6">Accedi</h2>
-        <form onSubmit={handleLogin}>
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2" htmlFor="email">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              className="w-full p-2 rounded bg-gray-700 border border-gray-600"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div className="mb-6">
-            <label
-              className="block text-sm font-medium mb-2"
-              htmlFor="password"
+    <GoogleOAuthProvider clientId={clientId}>
+      <div className="w-full flex flex-col items-center justify-center min-h-screen text-white">
+        <div className="bg-[#303030] p-8 rounded-lg shadow-md w-full max-w-md">
+          <h2 className="text-2xl font-bold mb-6">Accedi</h2>
+          <form onSubmit={handleLogin}>
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2" htmlFor="email">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                className="w-full p-2 rounded bg-gray-700 border border-gray-600"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                className="block text-sm font-medium mb-2"
+                htmlFor="password"
+              >
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                className="w-full p-2 rounded bg-gray-700 border border-gray-600"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-blue-600 py-2 rounded text-white hover:bg-blue-700 transition"
             >
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              className="w-full p-2 rounded bg-gray-700 border border-gray-600"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-600 py-2 rounded text-white hover:bg-blue-700 transition"
-          >
-            Accedi
-          </button>
+              Accedi
+            </button>
 
-          <div id="signInButton" className="my-4 flex justify-center">
-            <GoogleLogin
-              clientId={clientId}
-              onSuccess={onSuccess}
-              onFailure={onFailure}
-              cookiePolicy={"single_host_origin"}
-              isSignedIn={true}
-              render={(renderProps) => (
-                <button
-                  onClick={renderProps.onClick}
-                  disabled={renderProps.disabled}
-                  className="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700 transition"
-                >
-                  Login con Google
-                </button>
-              )}
-            />
-          </div>
-        </form>
+            <div id="signInButton" className="my-4 flex justify-center">
+              <GoogleLogin
+                onSuccess={onSuccess}
+                onFailure={onFailure}
+                logo="https://developers.google.com/identity/images/g-logo.png" // Aggiungi logo se necessario
+                buttonText="Login con Google"
+                onSuccess={onSuccess}
+                onFailure={onFailure}
+              />
+            </div>
+          </form>
 
-        <p className="mt-6 text-center">
-          Non hai un account?{" "}
-          <Link to="/register" className="text-blue-500 hover:underline">
-            Registrati
-          </Link>
-        </p>
+          <p className="mt-6 text-center">
+            Non hai un account?{" "}
+            <Link to="/register" className="text-blue-500 hover:underline">
+              Registrati
+            </Link>
+          </p>
+        </div>
       </div>
-    </div>
+    </GoogleOAuthProvider>
   );
 }
 

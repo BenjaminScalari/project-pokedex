@@ -34,15 +34,15 @@ function LoginPage() {
     }
   };
 
-  const onSuccess = (response) => {
-    console.log("LOGIN SUCCESS! Current user: ", response);
-    const token = response.credential; // Estrai il token dal response
+  const onSuccess = (res) => {
+    console.log("LOGIN SUCCESS! Current user: ", res.profile);
+    const token = res.credential; // Estrai il token dal res
     localStorage.setItem("token", token);
     navigate("/user");
   };
 
-  const onFailure = (error) => {
-    console.log("LOGIN FAILED! Error: ", error);
+  const onFailure = (res) => {
+    console.log("LOGIN FAILED! res: ", res);
   };
 
   return (
@@ -65,10 +65,7 @@ function LoginPage() {
               />
             </div>
             <div className="mb-6">
-              <label
-                className="block text-sm font-medium mb-2"
-                htmlFor="password"
-              >
+              <label className="block text-sm font-medium mb-2" htmlFor="password">
                 Password
               </label>
               <input
@@ -91,6 +88,7 @@ function LoginPage() {
               <GoogleLogin
                 onSuccess={onSuccess}
                 onFailure={onFailure}
+                cookiePolicy={"single_host_origin"}
                 render={(renderProps) => (
                   <button
                     onClick={renderProps.onClick}
